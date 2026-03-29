@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Handwritten Digit Recognition</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .logo {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      width: 64px;
+      height: auto;
+      z-index: 10;
+    }
+    .centered {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    h2 { color: #fff; margin-bottom: 15px; }
+    #canvas {
+      border: 2px solid #fff;
+      background: #000;
+      margin-bottom: 18px;
+      display: block;
+      box-shadow: 0 0 16px #fff2;
+    }
+    .action-bar {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    button {
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 7px;
+      padding: 11px 30px;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    button:hover {
+      background: #222;
+      color: #fff;
+      border: 1.2px solid #fff;
+    }
+    #result {
+      color: #fff;
+      font-size: 2em;
+      min-height: 2em;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- Your logo image at top left (ensure vnr-logo.jpg is in the same folder) -->
+  <img src="vnr-logo.jpg" class="logo" alt="Logo" />
+  <div class="centered">
+    <h2>Handwritten Digit Recognition</h2>
+    <canvas id="canvas" width="150" height="150"></canvas>
+    <div class="action-bar">
+      <button id="clear">Clear</button>
+      <button id="predict">Predict</button>
+    </div>
+    <div id="result"></div>
+  </div>
+  <script>
+    let canvas = document.getElementById('canvas');
+    let ctx = canvas.getContext('2d');
+    let drawing = false;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    canvas.addEventListener('mousedown', () => { drawing = true; });
+    canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
+    canvas.addEventListener('mouseout', () => { drawing = false; ctx.beginPath(); });
+    canvas.addEventListener('mousemove', function(e){
+      if (!drawing) return;
+      ctx.lineWidth = 12;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#fff';
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(e.offsetX, e.offsetY);
+    });
+
+    document.getElementById('clear').onclick = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      document.getElementById('result').innerText = '';
+    };
+    document.getElementById('predict').onclick = async function() {
+      let data = canvas.toDataURL();
+      let response = await fetch('http://localhost:5000/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: data })
+      });
+      let result = await response.json();
+      document.getElementById('result').innerText = "Prediction: " + result.digit;
+    };
+  </script>
+</body>
+</html>
