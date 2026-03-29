@@ -1,0 +1,1 @@
+A hybrid handwritten digit recognition project that combines a CNN for feature extraction with an SVM classifier for final prediction. Built using the MNIST dataset, this model preprocesses digit images, extracts deep features using TensorFlow/Keras, and classifies them with Scikit-learn’s SVM for accurate digit recognition.
